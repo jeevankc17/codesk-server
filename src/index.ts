@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -8,6 +8,10 @@ import { clerkMiddleware, clerkClient, requireAuth } from '@clerk/express';
 
 /* ROUTE IMPORTS */
 import userClerkRoutes from './routes/userClerkRoute';
+import {
+  notFoundHandler,
+  errorHandler,
+} from './middleware/errorHandlerMiddleware';
 
 dotenv.config();
 
@@ -27,8 +31,21 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Add a root route handler
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Codesk API is running',
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 /* ROUTES */
 app.use('/users/clerk', userClerkRoutes);
+
+// Error handling (must be after routes)
+app.use('*', notFoundHandler);
+app.use(errorHandler);
 
 /* SERVER */
 const port = Number(process.env.PORT) || 3001;

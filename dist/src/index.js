@@ -12,6 +12,7 @@ const morgan_1 = __importDefault(require("morgan"));
 const express_2 = require("@clerk/express");
 /* ROUTE IMPORTS */
 const userClerkRoute_1 = __importDefault(require("./routes/userClerkRoute"));
+const errorHandlerMiddleware_1 = require("./middleware/errorHandlerMiddleware");
 dotenv_1.default.config();
 /* CONFIGURATIONS */
 const app = (0, express_1.default)();
@@ -27,8 +28,19 @@ app.use(body_parser_1.default.urlencoded({ extended: false }));
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
 });
+// Add a root route handler
+app.get('/', (req, res) => {
+    res.json({
+        message: 'Codesk API is running',
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+    });
+});
 /* ROUTES */
 app.use('/users/clerk', userClerkRoute_1.default);
+// Error handling (must be after routes)
+app.use('*', errorHandlerMiddleware_1.notFoundHandler);
+app.use(errorHandlerMiddleware_1.errorHandler);
 /* SERVER */
 const port = Number(process.env.PORT) || 3001;
 app.listen(port, '0.0.0.0', () => {
