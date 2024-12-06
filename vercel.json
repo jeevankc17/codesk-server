@@ -19,5 +19,6 @@
                 "OPTIONS"
             ]
         }
-    ]
+    ],
+    "buildCommand": "prisma generate && prisma migrate deploy && npm run build"
 }
