@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { Webhook } from 'svix';
+import dotenv from 'dotenv';
+
+// Ensure environment variables are loaded
+dotenv.config();
 
 export const verifyClerkWebhookSignature = async (
   req: Request,
@@ -7,12 +11,14 @@ export const verifyClerkWebhookSignature = async (
   next: NextFunction
 ): Promise<void> => {
   console.log('🔍 Webhook Request Received');
-  console.log('Headers:', JSON.stringify(req.headers, null, 2));
-  console.log('Body:', JSON.stringify(req.body, null, 2));
+  console.log('Environment variables loaded:', {
+    hasWebhookSecret: !!process.env.CLERK_WEBHOOK_SECRET,
+    nodeEnv: process.env.NODE_ENV
+  });
 
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
   if (!WEBHOOK_SECRET) {
-    console.error('❌ Missing CLERK_WEBHOOK_SECRET');
+    console.error('❌ Missing CLERK_WEBHOOK_SECRET. Available env vars:', Object.keys(process.env));
     res.status(500).json({ error: 'Clerk webhook secret not configured' });
     return;
   }
