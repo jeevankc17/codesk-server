@@ -13,8 +13,6 @@ import {
   errorHandler,
 } from './api/v1/middleware/errorHandlerMiddleware';
 
-import { DatabaseHealthService } from './services/databaseHealthService';
-
 dotenv.config();
 
 /* CONFIGURATIONS */
@@ -51,14 +49,6 @@ app.use('/api/v1', v1Routes);
 // Error handling (must be after routes)
 app.use('*', notFoundHandler);
 app.use(errorHandler);
-
-// Check database health periodically
-setInterval(async () => {
-  await DatabaseHealthService.checkHealth();
-}, 60000); // Every minute
-
-// Initial check
-DatabaseHealthService.checkHealth();
 
 // For local development
 if (process.env.NODE_ENV !== 'production') {
