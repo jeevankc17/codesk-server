@@ -9,7 +9,7 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
     const eventType = evt.type;
     const { id } = evt.data;
 
-    await LogService.log('webhook', 'info', 'Webhook event received', {
+    await LogService.log('webhook', 'info', 'Webhook received', {
       type: eventType,
       userId: id,
       data: evt.data
@@ -19,7 +19,7 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
       case 'user.created': {
         const { email_addresses, primary_email_address_id, first_name, last_name } = evt.data;
         
-        console.log('Creating user with data:', {
+        await LogService.log('webhook', 'info', 'User creation started', {
           clerkId: id,
           email_addresses,
           primary_email_address_id,
@@ -87,7 +87,11 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
           });
 
           console.log('✅ User updated successfully:', updatedUser);
-          await LogService.log('webhook', 'info', 'User updated successfully', updatedUser);
+          await LogService.log('webhook', 'info', 'User update successful', {
+            userId: id,
+            updateData,
+            public_metadata
+          });
         } catch (error) {
           console.error('❌ Update failed:', error);
           throw error; // Re-throw to be caught by the main try-catch
@@ -116,7 +120,9 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
           });
 
           console.log('✅ User deleted successfully:', deletedUser);
-          await LogService.log('webhook', 'info', 'User deleted successfully', { clerkId: id });
+          await LogService.log('webhook', 'info', 'User deletion successful', {
+            userId: id
+          });
         } catch (error) {
           console.error('❌ Delete failed:', error);
           throw error; // Re-throw to be caught by the main try-catch
@@ -136,7 +142,7 @@ export const handleClerkWebhook = async (req: Request, res: Response) => {
 
     res.status(200).json(response);
   } catch (error) {
-    await LogService.log('webhook', 'error', 'Webhook processing failed', {
+    await LogService.log('webhook', 'error', 'Webhook failed', {
       error: error instanceof Error ? {
         message: error.message,
         stack: error.stack

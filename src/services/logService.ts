@@ -11,8 +11,9 @@ export class LogService {
     metadata?: any
   ) {
     try {
-      // Log to console
-      console[level](message, metadata);
+      // Log to console with emojis based on type/level
+      const emoji = this.getEmoji(type, level);
+      console[level](`${emoji} ${message}`, metadata);
 
       // Store in database
       await prisma.log.create({
@@ -25,6 +26,17 @@ export class LogService {
       });
     } catch (error) {
       console.error('Logging error:', error);
+    }
+  }
+
+  private static getEmoji(type: LogType, level: LogLevel): string {
+    if (level === 'error') return '❌';
+    
+    switch (type) {
+      case 'webhook': return '🔄';
+      case 'auth': return '🔐';
+      case 'system': return '⚙️';
+      default: return '📝';
     }
   }
 
