@@ -4,14 +4,14 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { clerkMiddleware, clerkClient, requireAuth } from '@clerk/express';
+import { clerkMiddleware } from '@clerk/express';
 
 /* ROUTE IMPORTS */
-import userClerkRoutes from './routes/userClerkRoute';
+import v1Routes from './api/v1/routes';
 import {
   notFoundHandler,
   errorHandler,
-} from './middleware/errorHandlerMiddleware';
+} from './api/v1/middleware/errorHandlerMiddleware';
 
 dotenv.config();
 
@@ -37,18 +37,26 @@ app.get('/', (req, res) => {
     message: 'Codesk API is running',
     status: 'ok',
     timestamp: new Date().toISOString(),
+    versions: {
+      v1: '/api/v1',
+    },
   });
 });
 
-/* ROUTES */
-app.use('/users/clerk', userClerkRoutes);
+/* API VERSIONS */
+app.use('/api/v1', v1Routes);
 
 // Error handling (must be after routes)
 app.use('*', notFoundHandler);
 app.use(errorHandler);
 
-/* SERVER */
-const port = Number(process.env.PORT) || 3001;
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Server running on port ${port}`);
-});
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const port = Number(process.env.PORT) || 3000;
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
+
+// Export for Vercel
+export default app;

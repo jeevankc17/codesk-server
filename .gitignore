@@ -11,3 +11,5 @@ build/
 # Other
 .DS_Store
 *.log
+
+.vercel

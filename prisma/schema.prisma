@@ -12,11 +12,24 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  clerkId   String   @unique // Links to Clerk's user ID
-  email     String   @unique
+  id        String    @id @default(cuid())
+  clerkId   String    @unique
+  email     String    @unique
   name      String?
-  role      String   @default("user")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      String    @default("user")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Log {
+  id        String    @id @default(cuid())
+  type      String    // 'webhook', 'auth', 'error', etc.
+  level     String    // 'info', 'error', 'warn', 'debug'
+  message   String
+  metadata  Json?     // For additional data
+  timestamp DateTime  @default(now())
+
+  @@map("logs")
 }

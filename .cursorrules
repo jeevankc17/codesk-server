@@ -1,0 +1,91 @@
+{
+  "rules": {
+    "mvc_pattern": {
+      "routes": {
+        "description": "Routes should only handle URL mapping to controllers",
+        "rules": [
+          "No business logic in route files",
+          "Only import controllers and middleware",
+          "Use descriptive route names",
+          "Group related routes together"
+        ],
+        "example": "router.get('/dashboard', dashboardController.getDashboard);"
+      },
+      "controllers": {
+        "description": "Controllers handle business logic and request processing",
+        "rules": [
+          "Handle request/response logic",
+          "Use try-catch for error handling",
+          "Keep functions focused and small",
+          "Use services for complex operations"
+        ]
+      },
+      "models": {
+        "description": "Models define data structures using Prisma",
+        "rules": [
+          "Define data schemas",
+          "Handle data validation",
+          "No business logic in models"
+        ]
+      }
+    },
+    "separation_of_concerns": {
+      "middleware": {
+        "description": "Handle cross-cutting concerns",
+        "rules": [
+          "Authentication/Authorization",
+          "Request validation",
+          "Error handling",
+          "Logging"
+        ]
+      },
+      "services": {
+        "description": "Handle complex business logic",
+        "rules": [
+          "Data processing",
+          "External API calls",
+          "Reusable business logic"
+        ]
+      }
+    },
+    "file_organization": {
+      "naming": {
+        "routes": "*Route.ts",
+        "controllers": "*Controller.ts",
+        "middleware": "*Middleware.ts",
+        "services": "*Service.ts"
+      },
+      "structure": {
+        "src/": {
+          "api/": {
+            "v1/": {
+              "routes/": "Route definitions",
+              "controllers/": "Request handlers",
+              "middleware/": "Middleware functions",
+              "services/": "Business logic"
+            }
+          },
+          "utils/": "Helper functions",
+          "types/": "Type definitions",
+          "lib/": "External configurations"
+        }
+      }
+    },
+    "code_quality": {
+      "testing": {
+        "rules": [
+          "Write unit tests for controllers",
+          "Test error cases",
+          "Mock external dependencies"
+        ]
+      },
+      "error_handling": {
+        "rules": [
+          "Use consistent error response format",
+          "Proper error logging",
+          "Don't expose sensitive information"
+        ]
+      }
+    }
+  }
+} 
