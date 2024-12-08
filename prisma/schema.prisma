@@ -33,3 +33,239 @@ model Log {
 
   @@map("logs")
 }
+
+
+// schema.prisma
+
+model Hackathon {
+  id                 String      @id @default(cuid())
+  name               String
+  tagline            String
+  about              String      @db.Text
+  themes             String[]
+  approxParticipants Int
+  minTeamSize        Int
+  maxTeamSize        Int
+  venue              String
+  
+  // Dates
+  timezone           String
+  applicationOpen    DateTime
+  applicationClose   DateTime
+  rsvpWithin         Int
+  hackathonBegins    DateTime
+  submissionDeadline DateTime
+
+  // Application
+  selectedFields     String[]
+
+  // Links
+  websiteUrl         String?
+  codeskUrl          String?
+  contactEmail       String
+  codeOfConductUrl   String?
+  useCodeOfConductUrl Boolean   @default(false)
+  
+  // Social Links
+  twitter            String?
+  linkedin           String?
+  discord            String?
+  slack              String?
+  hashnode           String?
+  telegram           String?
+  facebook           String?
+  instagram          String?
+
+  // Brand
+  brandColor         String
+  logoUrl            String?
+  faviconUrl         String?
+  coverImageUrl      String?
+
+  // Relations
+  partners           Partner[]
+  tracks             Track[]
+  speakers           Speaker[]
+  events             ScheduleEvent[]
+  faqs              FAQ[]
+  projects           Project[]
+  
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  organizerId        String
+  organizer          Organizer   @relation(fields: [organizerId], references: [id])
+}
+
+model Builder {
+  id                    String    @id @default(cuid())
+  name                  String
+  email                 String    @unique
+  phone                 String
+  avatarUrl             String?
+  bio                   String    @db.Text
+  gender                String
+  tShirtSize            String
+  
+  // Education
+  institution           String
+  degree               String
+  fieldOfStudy         String
+  graduationYear       Int
+
+  // Skills & Experience
+  skills               String[]
+  experience           String    @db.Text
+  resumeUrl            String?
+  portfolioUrl         String?
+
+  // Social Links
+  github               String?
+  linkedin             String?
+  twitter              String?
+  website              String?
+
+  // Additional Info
+  interests            String[]
+  dietaryRestrictions  String?
+  
+  // Emergency Contact
+  emergencyContactName      String
+  emergencyContactRelation  String
+  emergencyContactPhone     String
+  
+  // Relations
+  projects             ProjectBuilder[]
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model Project {
+  id           String    @id @default(cuid())
+  projectName  String
+  tagline      String
+  problem      String    @db.Text
+  challenges   String    @db.Text
+  technologies String[]
+  links        String[]
+  videoDemo    String?
+  coverImageUrl String?
+  pictureUrls  String[]
+  logoUrl      String?
+  platforms    String[]
+  
+  // Relations
+  hackathonId  String
+  hackathon    Hackathon @relation(fields: [hackathonId], references: [id])
+  builders     ProjectBuilder[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model ProjectBuilder {
+  id          String   @id @default(cuid())
+  projectId   String
+  builderId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  builder     Builder  @relation(fields: [builderId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([projectId, builderId])
+}
+
+model Organizer {
+  id                 String      @id @default(cuid())
+  name               String
+  email              String      @unique
+  phone              String
+  role               String
+  
+  // Address
+  street             String
+  city               String
+  state              String
+  country            String
+  zipCode            String
+
+  // Organization Details
+  organizationName   String
+  organizationType   String
+  description        String      @db.Text
+  website            String?
+  logoUrl            String?
+  establishedYear    Int
+  teamSize           Int
+  previousHackathons Int
+  requiredSkills     String[]
+
+  // Social Links
+  linkedin           String?
+  twitter            String?
+  github             String?
+  facebook           String?
+  instagram          String?
+
+  // Relations
+  hackathons         Hackathon[]
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+
+model Partner {
+  id          String    @id @default(cuid())
+  name        String
+  logoUrl     String?
+  website     String?
+  hackathonId String
+  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Track {
+  id          String    @id @default(cuid())
+  name        String
+  description String    @db.Text
+  prizes      Json
+  hackathonId String
+  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Speaker {
+  id          String    @id @default(cuid())
+  name        String
+  bio         String    @db.Text
+  photoUrl    String?
+  designation String
+  company     String
+  hackathonId String
+  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ScheduleEvent {
+  id          String    @id @default(cuid())
+  title       String
+  description String    @db.Text
+  startTime   DateTime
+  endTime     DateTime
+  type        String
+  location    String?
+  hackathonId String
+  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model FAQ {
+  id          String    @id @default(cuid())
+  question    String
+  answer      String    @db.Text
+  hackathonId String
+  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}

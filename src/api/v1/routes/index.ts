@@ -1,8 +1,10 @@
 import express from 'express';
 import userClerkRoutes from './userClerkRoute';
 import webhookClerkRoutes from './webhookClerkRoute';
-import dashboardRoutes from './dashboardRoute';
-import { authMiddleware } from '../middleware/clerkMiddleware';
+import hackathonRoutes from './hackathonRoute'; 
+import builderRoutes from './builderRoute';
+import projectRoutes from './projectRoute';
+import organizerRoutes from './organizerRoute'; 
 
 const router = express.Router();
 
@@ -17,8 +19,11 @@ router.get('/', (req, res) => {
 
 router.use('/webhook', webhookClerkRoutes);
 
-// Protected routes
-router.use('/users/clerk', authMiddleware, userClerkRoutes);
-router.use('/dashboard', authMiddleware, dashboardRoutes);
+// Protected routes - using Clerk's built-in auth
+router.use('/builders', builderRoutes);  // Note: changed from /builder to /builders
+router.use('/projects', projectRoutes);
+router.use('/hackathons', hackathonRoutes);
+router.use('/organizers', organizerRoutes);
+router.use('/users/clerk', userClerkRoutes);
 
 export default router; 
