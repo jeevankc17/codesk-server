@@ -1,17 +1,17 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { ClerkExpressRequireAuth } from '@clerk/clerk-sdk-node';
-
+import { requireAuth } from '@clerk/express';
 /* ROUTE IMPORTS */
 import v1Routes from './api/v1/routes';
 import {
   notFoundHandler,
   errorHandler,
 } from './api/v1/middleware/errorHandlerMiddleware';
+import { loggingMiddleware } from './middleware/loggingMiddleware';
 
 dotenv.config();
 
@@ -24,23 +24,19 @@ app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
 app.use(morgan('common'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(loggingMiddleware);
 
-// Add a root route handler
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Codesk API is running',
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    versions: {
-      v1: '/api/v1',
-    },
-  });
-});
+// Initialize Clerk with your secret key
+if (!process.env.CLERK_SECRET_KEY) {
+  throw new Error('Missing CLERK_SECRET_KEY');
+}
+
 
 /* API VERSIONS */
-app.use('/api/v1', ClerkExpressRequireAuth(), v1Routes);
+app.use('/api/v1', v1Routes);
 
-// Error handling (must be after routes)
+
+// Keep existing error handlers
 app.use('*', notFoundHandler);
 app.use(errorHandler);
 

@@ -2,40 +2,44 @@ import { Request, Response } from 'express';
 import { BuilderService } from '../services/builderService';
 import { ApiError } from '../utils/ApiError';
 
-export class BuilderController {
-  private builderService: BuilderService;
+const builderService = new BuilderService();
 
-  constructor() {
-    this.builderService = new BuilderService();
-  }
-
-  createBuilder = async (req: Request, res: Response) => {
+export const builderController = {
+  createBuilder: async (req: Request, res: Response) => {
     try {
       const builderData = req.body;
+      const userId = req.auth?.userId;
+
+      console.log('Creating builder with data:', {
+        ...builderData,
+        userId,
+      });
       
-      // Validate required fields
-      const requiredFields = [
-        'name', 'email', 'phone', 'bio', 'gender', 'tShirtSize',
-        'institution', 'degree', 'fieldOfStudy', 'graduationYear',
-        'skills', 'experience', 'interests',
-        'emergencyContactName', 'emergencyContactRelation', 'emergencyContactPhone'
-      ];
+      const builder = await builderService.createBuilder({
+        ...builderData,
+        userId
+      });
 
-      for (const field of requiredFields) {
-        if (!builderData[field]) {
-          throw new ApiError(400, `Missing required field: ${field}`);
-        }
-      }
+      res.status(201).json({
+        status: 'success',
+        data: builder
+      });
 
-      const builder = await this.builderService.createBuilder(builderData);
-      res.status(201).json(builder);
     } catch (error) {
-      if (error instanceof ApiError) {
-        res.status(error.statusCode).json({ error: error.message });
-      } else {
-        console.error('Error creating builder:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      console.error('Error in builderController:', {
+        error,
+        requestBody: req.body,
+        userId: req.auth?.userId
+      });
+
+      const apiError = error instanceof ApiError 
+        ? error 
+        : new ApiError(500, 'Failed to create builder');
+
+      res.status(apiError.statusCode).json({
+        status: 'error',
+        message: apiError.message
+      });
     }
-  };
-} 
+  }
+}; 

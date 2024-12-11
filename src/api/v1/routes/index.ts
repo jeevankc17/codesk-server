@@ -1,12 +1,28 @@
-import express from 'express';
-import userClerkRoutes from './userClerkRoute';
-import webhookClerkRoutes from './webhookClerkRoute';
-import hackathonRoutes from './hackathonRoute'; 
-import builderRoutes from './builderRoute';
-import projectRoutes from './projectRoute';
-import organizerRoutes from './organizerRoute'; 
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
+import { requireAuth } from '@clerk/express';
+import { checkUserRole } from '../middleware/roleMiddleware';
+import userClerkRoutes from './userClerkRoutes';
+import webhookClerkRoutes from './webhookClerkRoutes';
+import hackathonRoutes from './hackathonRoutes'; 
+import builderRoutes from './builderRoutes';
+import projectRoutes from './projectRoutes';
+import organizerRoutes from './organizerRoutes'; 
 
-const router = express.Router();
+const router = Router();
+
+
+// Logging middleware
+router.use((req, res, next) => {
+  console.log('\n=== Request Details ===');
+  console.log({
+    method: req.method,
+    path: req.path,
+    baseUrl: req.baseUrl,
+    originalUrl: req.originalUrl,
+    headers: req.headers
+  });
+  next();
+});
 
 // Public routes
 router.get('/', (req, res) => {
@@ -17,13 +33,33 @@ router.get('/', (req, res) => {
   });
 });
 
+// Webhook routes (public)
 router.use('/webhook', webhookClerkRoutes);
 
-// Protected routes - using Clerk's built-in auth
-router.use('/builders', builderRoutes);  // Note: changed from /builder to /builders
-router.use('/projects', projectRoutes);
-router.use('/hackathons', hackathonRoutes);
-router.use('/organizers', organizerRoutes);
-router.use('/users/clerk', userClerkRoutes);
+// Protected routes with Clerk auth
+const clerkAuth = requireAuth({
+  debug: process.env.NODE_ENV !== 'production'
+});
+
+// Add error handling middleware after Clerk auth
+router.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  if (err?.statusCode === 401) {
+    res.status(401).json({
+      error: 'Authentication required'
+    });
+  }
+  next(err);
+});
+
+// Apply auth and role middleware to protected routes with debugging
+router.use('/builders', 
+  clerkAuth,
+  checkUserRole, 
+  builderRoutes
+);
+router.use('/projects', clerkAuth, checkUserRole, projectRoutes);
+router.use('/hackathons', clerkAuth, checkUserRole, hackathonRoutes);
+router.use('/organizers', clerkAuth, checkUserRole, organizerRoutes);
+router.use('/users/clerk', clerkAuth, checkUserRole, userClerkRoutes);
 
 export default router; 
